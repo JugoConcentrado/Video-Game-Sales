@@ -1,0 +1,17 @@
+html {
+    text-align: center;
+}
+#main_div {
+    width: 800;
+    height: 600;
+    margin: 0 auto;
+}
+.texto {
+    font-size: 9px;
+    word-break: break-word;
+    font-family: sans-serif;
+}
+.text-legend{
+    font-size: 15px;
+    color: black;
+}

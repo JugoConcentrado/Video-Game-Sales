@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="stylesheet" href="./styles.css" />
+        <title>Video Game Sales</title>
+        <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
+    </head>
+    <body>
+        <h1 id="title">Video Game Sales</h1>
+        <h2 id="description">Top 100 Most Sold Video Games Grouped by Platform</h2>
+        <div id="main_div">
+
+        </div>
+        <div id="legend"></div>
+        <script>
+           
+
+          // Create SVG element
+          const svg = d3.select("#main_div")
+                      .append("svg")
+                      .attr("width", 960)
+                      .attr("height", 600)
+                      .append("g")
+                      .attr("transform", "translate(0,0)");
+
+          // Load the data
+          d3.json('https://cdn.freecodecamp.org/testable-projects-fcc/data/tree_map/video-game-sales-data.json').then(data => {
+            let dataset = data
+            // Create an ordinal scale for colors
+            const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+                //tooltips
+                var Tooltip = d3.select("div")
+                            .append("div")
+                            .attr("id", "tooltip")
+                            .attr("display","block")
+                            .style("opacity", 0)
+                            .attr("class", "tooltip")
+                            .style("position","absolute")
+                            .style("background-color","black")
+                            .style("border-width", "2px")
+                            .style("border-radius", "5px")
+                            .style("padding", "5px")
+                            
+
+                var mouseover = function(d,i) {
+                                    Tooltip
+                                    .style("opacity", 0.8)
+                                    .html("Name: " +i.data.name +"</br>"+"Category: " +i.data.category +"</br>"+"Value: "+ i.data.value )
+                                    .style("color","white")
+                                    .style('left', event.pageX + 'px')
+                                    .style('top', event.pageY - 28 + 'px')
+                                    .style("z-index","2")
+                                }
+                var mousemove = function(d,i) {
+                                    Tooltip
+                                    .style('left', event.pageX + 5+'px')
+                                    .style('top', event.pageY - 28 + 'px')
+                                }
+                var mouseleave = function(d) {
+                                    Tooltip
+                                    .style("opacity", 0)
+                                    .html(" ")
+                                    .style("z-index","0");
+                                  }
+            // Create a treemap layout
+            const treemap = d3.treemap()
+                            .size([960, 600])
+                            .padding(1)
+                            .round(true);
+
+            // Sum up the value of each node
+            const root = d3.hierarchy(data)
+                          .sum(d => d.value)
+                          .sort((a, b) => b.value - a.value);
+
+            // Compute the treemap layout
+            treemap(root);
+
+            // Create a group for each node
+            const cell = svg.selectAll("g")
+                            .data(root.leaves())
+                            .enter().append("g")
+                            .attr("transform", d => `translate(${d.x0},${d.y0})`);
+
+            // Append rectangles to represent each node
+            cell.append("rect")
+                .attr("width", d => d.x1 - d.x0)
+                .attr("height", d => d.y1 - d.y0)
+                .classed("tiles",true)
+                .attr("data-name",d => d.data.name)
+                .attr("data-caategory", d=> d.data.category)
+                .attr("data-value", d=> d.data.value)
+                .attr("fill", d => colorScale(d.data.category))
+                .on("mouseover", mouseover)
+                .on("mouseleave", mouseleave)
+                .on("mousemove",mousemove);
+
+            // Append text to show the name of each node
+            cell.append("text")
+                .classed("texto",true)
+                .attr("x", 3)
+                .attr("y", 10)
+                .attr("dy", ".35em")
+                .text(d => d.data.name.split(' ')[0])
+                .attr("dy", "0em");
+                cell.append("text")
+                .classed("texto",true)
+                .attr("x", 3)
+                .attr("y", 10)
+                .text(d => d.data.name.split(' ')[1])
+                .attr("dy", "1em");
+                cell.append("text")
+                .classed("texto",true)
+                .attr("x", 3)
+                .attr("y", 10)
+                .text(d => d.data.name.split(' ')[2])
+                .attr("dy", "2em")
+                cell.append("text")
+                .classed("texto",true)
+                .attr("x", 3)
+                .attr("y", 10)
+                .text(d => d.data.name.split(' ')[3])
+                .attr("dy", "3em")
+                cell.append("text")
+                .classed("texto",true)
+                .attr("x", 3)
+                .attr("y", 10)
+                .text(d => d.data.name.split(' ')[4])
+                .attr("dy", "4em")
+                cell.append("text")
+                .classed("texto",true)
+                .attr("x", 3)
+                .attr("y", 10)
+                .text(d => d.data.name.split(' ')[5])
+                .attr("dy", "5em")
+          
+          let legendDataset = []
+          for(let j = 0; j < data.children.length; j++){
+            if(j >= 9){
+              legendDataset.push([d3.schemeCategory10[j-9], data.children[j].name])
+            }
+            else {
+              legendDataset.push([d3.schemeCategory10[j], data.children[j].name])
+            }
+          }
+          
+          let legend = d3.select("#legend")
+                         .append("svg")
+                         .attr("width", 960)
+                         .attr("height", 600)
+                         .append("g")
+                         .attr("width", 960)
+                         .attr("height", 600);
+
+          legend.selectAll("rect")
+                .data(legendDataset)
+                .enter()
+                .append("g")
+
+          legend.selectAll("g")
+                .append("rect")
+                .classed("legend-item",true)
+                .attr("width", "15px")
+                .attr("height","15px")
+                .attr("x", 0)
+                .attr("y",(d,i)=> i*20+"px")
+                .attr("fill",(d,i)=> d[0])
+          legend.selectAll("g")
+                .append("text")
+                .classed("text-legend",true)
+                .text((d,i)=> d[1])
+                .attr("font-size","15px")
+                .attr("x", 20)
+                .attr("y",(d,i)=> i*21 -3) +"px";
+
+                
+
+
+
+
+
+          }).catch(error => {
+            console.error('Error loading the data: ', error);
+          });
+        </script>
+    </body>
+
+</html>
